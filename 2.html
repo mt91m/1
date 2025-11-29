@@ -3,132 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> جزوات</title>
+    <title>جزوات درسی</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap');
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        
         body {
-            font-family: sans-serif;
             direction: rtl;
-            background: #f5f5f5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
-            max-width: 1000px;
-            margin: 0 auto;
         }
+        
         .container {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 20px;
-        }
-        .sidebar {
+            max-width: 1200px;
+            margin: 0 auto;
             background: white;
-            padding: 15px;
-            border-radius: 10px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
-        .main {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-        }
-        .login-section {
-            background: #e3f2fd;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
             text-align: center;
-            grid-column: 1 / -1;
         }
+        
+        .login-section {
+            padding: 40px;
+            text-align: center;
+            background: #e3f2fd;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 0;
+            min-height: 600px;
+        }
+        
+        .sidebar {
+            background: #34495e;
+            color: white;
+            padding: 25px;
+        }
+        
+        .content-area {
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        
         .hidden {
             display: none;
         }
+        
         input, button, select {
-            padding: 8px;
-            margin: 5px;
+            padding: 12px;
+            margin: 8px 0;
             border: 1px solid #ddd;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-size: 16px;
             width: 100%;
         }
+        
         button {
-            background: #2196f3;
+            background: #3498db;
             color: white;
             border: none;
             cursor: pointer;
+            transition: background 0.3s;
         }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
         .file-item {
-            background: #f9f9f9;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: 1px solid #eee;
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
+        
         .category-item {
-            padding: 10px;
-            margin: 5px 0;
-            background: #e3f2fd;
-            border-radius: 5px;
+            padding: 15px;
+            margin: 8px 0;
+            background: #4a6572;
+            border-radius: 8px;
             cursor: pointer;
+            transition: background 0.3s;
         }
+        
+        .category-item:hover {
+            background: #556f7c;
+        }
+        
         .category-item.active {
-            background: #2196f3;
-            color: white;
+            background: #3498db;
         }
+        
         .file-actions {
-            margin-top: 10px;
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
         }
+        
         .admin-only {
-            background: #ff5722;
+            background: #e74c3c;
         }
-         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap');
-    
-    body {
-        font-family: 'Vazirmatn', sans-serif;
-        /* بقیه کدها */
-    }
+        
+        .admin-only:hover {
+            background: #c0392b;
+        }
+        
+        .upload-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 2px dashed #bdc3c7;
+        }
+        
+        .user-badge {
+            background: #27ae60;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
-    <!-- بخش ورود -->
-    <div class="login-section" id="loginSection">
-        <h3>ورود به سیستم</h3>
-        <input type="text" id="username" placeholder="نام کاربری">
-        <input type="password" id="password" placeholder="رمز عبور">
-        <button onclick="login()">ورود</button>
-    </div>
-
-    <div class="container hidden" id="mainApp">
-        <!-- سایدبار دسته‌بندی -->
-        <div class="sidebar">
-            <h3>📁 دسته‌بندی‌ها</h3>
-            
-            <div id="adminControls" class="hidden">
-                <input type="text" id="newCategory" placeholder="نام دسته جدید">
-                <button onclick="addCategory()">➕ اضافه کردن دسته</button>
-                <hr>
-            </div>
-
-            <div id="categoriesList">
-                <div class="category-item active" onclick="selectCategory('all')">همه فایل‌ها</div>
+    <div class="container">
+        <header>
+            <h1>📚 سیستم مدیریت جزوات درسی</h1>
+            <p>مدیریت و اشتراک‌گذاری جزوات آموزشی</p>
+        </header>
+        
+        <!-- بخش ورود -->
+        <div class="login-section" id="loginSection">
+            <h2>ورود به سیستم</h2>
+            <input type="text" id="username" placeholder="نام کاربری">
+            <input type="password" id="password" placeholder="رمز عبور">
+            <button onclick="login()">ورود به سیستم</button>
+            <div style="margin-top: 20px; color: #666;">
+                <p>👨‍🏫 مدیران: مهدیار طایفی (mio91fox) | دوستانه (dostane)</p>
+                <p>👁️ نمایشگر: بیننده (1111)</p>
             </div>
         </div>
+        
+        <!-- برنامه اصلی -->
+        <div class="main-content hidden" id="mainApp">
+            <!-- سایدبار -->
+            <div class="sidebar">
+                <h3>📁 دسته‌بندی‌ها</h3>
+                
+                <!-- کنترل‌های ادمین -->
+                <div id="adminControls" class="hidden">
+                    <input type="text" id="newCategory" placeholder="نام دسته جدید">
+                    <button onclick="addCategory()">➕ اضافه کردن دسته</button>
+                    <hr style="margin: 20px 0; border-color: #4a6572;">
+                </div>
 
-        <!-- بخش اصلی -->
-        <div class="main">
-            <div id="uploadSection" class="hidden">
-                <h3>📤 آپلود فایل جدید</h3>
-                <input type="file" id="fileInput">
-                <input type="text" id="fileName" placeholder="نام فایل (اختیاری)">
-                <select id="fileCategory">
-                    <option value="">انتخاب دسته‌بندی</option>
-                </select>
-                <button onclick="uploadFile()">آپلود فایل</button>
-                <button onclick="logout()">🚪 خروج</button>
+                <!-- لیست دسته‌بندی‌ها -->
+                <div id="categoriesList">
+                    <div class="category-item active" onclick="selectCategory('all')">
+                        📂 همه فایل‌ها
+                    </div>
+                </div>
             </div>
-
-            <div id="viewerSection">
-                <h3>📂 فایل‌ها 
-                    <span id="currentCategory"></span>
-                    <span id="userRoleBadge"></span>
-                </h3>
-                <div id="filesList">
-                    <!-- فایل‌ها اینجا نمایش داده می‌شوند -->
+            
+            <!-- محتوای اصلی -->
+            <div class="content-area">
+                <!-- بخش آپلود (فقط ادمین) -->
+                <div id="uploadSection" class="hidden">
+                    <div class="upload-section">
+                        <h3>📤 آپلود فایل جدید</h3>
+                        <input type="file" id="fileInput">
+                        <input type="text" id="fileName" placeholder="نام نمایشی فایل (اختیاری)">
+                        <select id="fileCategory">
+                            <option value="">انتخاب دسته‌بندی</option>
+                        </select>
+                        <button onclick="uploadFile()">آپلود فایل</button>
+                    </div>
+                </div>
+                
+                <!-- نمایش فایل‌ها -->
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>
+                            📂 فایل‌ها 
+                            <span id="currentCategory" style="color: #3498db;"></span>
+                        </h3>
+                        <div>
+                            <span id="userRoleBadge" class="user-badge"></span>
+                            <button onclick="logout()" style="width: auto; background: #e74c3c;">🚪 خروج</button>
+                        </div>
+                    </div>
+                    
+                    <div id="filesList">
+                        <div style="text-align: center; color: #7f8c8d; padding: 60px 20px;">
+                            <div style="font-size: 60px; margin-bottom: 20px;">📭</div>
+                            <h3>هنوز فایلی آپلود نشده است</h3>
+                            <p>برای شروع، فایل‌های درسی خود را آپلود کنید</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -140,13 +230,36 @@
             'مهدیار طایفی': { password: 'mio91fox', role: 'admin' },
             'بیننده': { password: '1111', role: 'viewer' },
             'دوستانه': { password: 'dostane', role: 'admin' }
-
         };
 
         let currentUser = null;
         let currentCategory = 'all';
-        let files = JSON.parse(localStorage.getItem('sharedFiles')) || [];
-        let categories = JSON.parse(localStorage.getItem('fileCategories')) || ['علوم', 'هندسه', 'تفکر'];
+        let files = [];
+        let categories = ['علوم', 'هندسه', 'تفکر', 'ریاضی', 'ادبیات'];
+
+        // بارگذاری داده‌ها از localStorage
+        function loadData() {
+            try {
+                const savedFiles = localStorage.getItem('sharedFiles');
+                const savedCategories = localStorage.getItem('fileCategories');
+                
+                if (savedFiles) files = JSON.parse(savedFiles);
+                if (savedCategories) categories = JSON.parse(savedCategories);
+            } catch (e) {
+                console.log('خطا در بارگذاری داده‌ها');
+                files = [];
+            }
+        }
+
+        // ذخیره داده‌ها در localStorage
+        function saveData() {
+            try {
+                localStorage.setItem('sharedFiles', JSON.stringify(files));
+                localStorage.setItem('fileCategories', JSON.stringify(categories));
+            } catch (e) {
+                console.log('خطا در ذخیره داده‌ها');
+            }
+        }
 
         // نمایش فایل‌ها
         function showFiles() {
@@ -156,14 +269,26 @@
                 : files.filter(file => file.category === currentCategory);
             
             if (filteredFiles.length === 0) {
-                filesList.innerHTML = '<p>📭 فایلی در این دسته وجود ندارد</p>';
+                filesList.innerHTML = `
+                    <div style="text-align: center; color: #7f8c8d; padding: 60px 20px;">
+                        <div style="font-size: 60px; margin-bottom: 20px;">📭</div>
+                        <h3>فایلی در این دسته وجود ندارد</h3>
+                        <p>فایل‌های خود را آپلود کنید</p>
+                    </div>
+                `;
                 return;
             }
 
             filesList.innerHTML = filteredFiles.map(file => `
                 <div class="file-item">
                     <strong>📄 ${file.name}</strong>
-                    <div>دسته: ${file.category} | سایز: ${file.size} | تاریخ: ${file.date}</div>
+                    <div style="margin: 10px 0; color: #666;">
+                        <small>
+                            🏷️ دسته: ${file.category} | 
+                            📏 سایز: ${file.size} | 
+                            📅 تاریخ: ${file.date}
+                        </small>
+                    </div>
                     <div class="file-actions">
                         <button onclick="downloadFile('${file.id}')">⬇️ دانلود</button>
                         <button onclick="viewFile('${file.id}')">👁️ مشاهده</button>
@@ -179,10 +304,9 @@
             const categoriesList = document.getElementById('categoriesList');
             const categorySelect = document.getElementById('fileCategory');
             
-            // به‌روزرسانی لیست دسته‌بندی‌ها
             categoriesList.innerHTML = `
                 <div class="category-item ${currentCategory === 'all' ? 'active' : ''}" 
-                     onclick="selectCategory('all')">همه فایل‌ها</div>
+                     onclick="selectCategory('all')">📂 همه فایل‌ها</div>
             `;
             
             categorySelect.innerHTML = '<option value="">انتخاب دسته‌بندی</option>';
@@ -190,7 +314,7 @@
             categories.forEach(cat => {
                 categoriesList.innerHTML += `
                     <div class="category-item ${currentCategory === cat ? 'active' : ''}" 
-                         onclick="selectCategory('${cat}')">${cat}</div>
+                         onclick="selectCategory('${cat}')">📁 ${cat}</div>
                 `;
                 categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
             });
@@ -205,16 +329,17 @@
             showFiles();
         }
 
-        // اضافه کردن دسته‌بندی (فقط ادمین)
+        // اضافه کردن دسته‌بندی
         function addCategory() {
             if (currentUser?.role !== 'admin') return;
             
             const newCat = document.getElementById('newCategory').value.trim();
             if (newCat && !categories.includes(newCat)) {
                 categories.push(newCat);
-                localStorage.setItem('fileCategories', JSON.stringify(categories));
+                saveData();
                 showCategories();
                 document.getElementById('newCategory').value = '';
+                alert(`دسته‌بندی "${newCat}" اضافه شد`);
             }
         }
 
@@ -229,24 +354,22 @@
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('mainApp').classList.remove('hidden');
                 
-                // نمایش کنترل‌های ادمین
-                if (currentUser.role === 'admin') {
-                    document.getElementById('uploadSection').classList.remove('hidden');
-                    document.getElementById('adminControls').classList.remove('hidden');
+                // مدیریت دسترسی‌ها
+                if (currentUser.role === 'viewer') {
+                    document.getElementById('uploadSection').style.display = 'none';
+                    document.getElementById('adminControls').style.display = 'none';
+                } else {
+                    document.getElementById('uploadSection').style.display = 'block';
+                    document.getElementById('adminControls').style.display = 'block';
                 }
                 
                 document.getElementById('userRoleBadge').textContent = 
-                    currentUser.role === 'admin' ? ' مدیر' : '👁️ نمایشگر';
-                    if (currentUser?.role === 'viewer') {
-        document.getElementById('uploadSection').style.display = 'none';
-        document.getElementById('adminControls').style.display = 'none';
-    } else if (currentUser?.role === 'admin') {
-        document.getElementById('uploadSection').style.display = 'block';
-        document.getElementById('adminControls').style.display = 'block';
-    }
+                    currentUser.role === 'admin' ? '👑 مدیر' : '👁️ نمایشگر';
                 
+                loadData();
                 showCategories();
                 showFiles();
+                
             } else {
                 alert('نام کاربری یا رمز عبور اشتباه است');
             }
@@ -261,7 +384,7 @@
             document.getElementById('password').value = '';
         }
 
-        // آپلود فایل (فقط ادمین)
+        // آپلود فایل
         function uploadFile() {
             if (currentUser?.role !== 'admin') {
                 alert('شما دسترسی آپلود ندارید');
@@ -270,7 +393,7 @@
 
             const fileInput = document.getElementById('fileInput');
             const fileName = document.getElementById('fileName').value || fileInput.files[0]?.name || 'فایل بدون نام';
-            const category = document.getElementById('fileCategory').value || 'سایر';
+            const category = document.getElementById('fileCategory').value || categories[0];
 
             if (!fileInput.files[0]) {
                 alert('لطفا یک فایل انتخاب کنید');
@@ -278,49 +401,55 @@
             }
 
             const file = fileInput.files[0];
-            const fileData = {
-                id: Date.now().toString(),
-                name: fileName,
-                size: formatFileSize(file.size),
-                date: new Date().toLocaleDateString('fa-IR'),
-                category: category,
-                file: file
-            };
-
-            files.push(fileData);
-            localStorage.setItem('sharedFiles', JSON.stringify(files));
             
-            fileInput.value = '';
-            document.getElementById('fileName').value = '';
-            showFiles();
-            alert('فایل با موفقیت آپلود شد');
+            // تبدیل فایل به Base64
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const fileData = {
+                    id: Date.now().toString(),
+                    name: fileName,
+                    originalName: file.name,
+                    size: formatFileSize(file.size),
+                    type: file.type,
+                    category: category,
+                    date: new Date().toLocaleDateString('fa-IR'),
+                    data: e.target.result, // داده Base64
+                    isBase64: true
+                };
+
+                files.push(fileData);
+                saveData();
+                
+                // ریست فرم
+                fileInput.value = '';
+                document.getElementById('fileName').value = '';
+                
+                showFiles();
+                alert('✅ فایل با موفقیت آپلود شد!');
+            };
+            reader.readAsDataURL(file);
         }
 
-        // دانلود فایل (همه کاربران)
+        // دانلود فایل
         function downloadFile(fileId) {
             const file = files.find(f => f.id === fileId);
-            if (file) {
-                const url = URL.createObjectURL(file.file);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = file.name;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+            if (file && file.data) {
+                const link = document.createElement('a');
+                link.href = file.data;
+                link.download = file.originalName || file.name;
+                link.click();
             }
         }
 
-        // مشاهده فایل (همه کاربران)
+        // مشاهده فایل
         function viewFile(fileId) {
             const file = files.find(f => f.id === fileId);
-            if (file) {
-                const url = URL.createObjectURL(file.file);
-                window.open(url, '_blank');
+            if (file && file.data) {
+                window.open(file.data, '_blank');
             }
         }
 
-        // حذف فایل (فقط ادمین)
+        // حذف فایل
         function deleteFile(fileId) {
             if (currentUser?.role !== 'admin') {
                 alert('شما دسترسی حذف فایل ندارید');
@@ -329,7 +458,7 @@
 
             if (confirm('آیا از حذف این فایل مطمئنید؟')) {
                 files = files.filter(file => file.id !== fileId);
-                localStorage.setItem('sharedFiles', JSON.stringify(files));
+                saveData();
                 showFiles();
             }
         }
@@ -342,6 +471,9 @@
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
+
+        // بارگذاری اولیه
+        loadData();
     </script>
 </body>
 </html>

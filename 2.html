@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> جزوات</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            direction: rtl;
+            background: #f5f5f5;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+        }
+        .sidebar {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .main {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .login-section {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            grid-column: 1 / -1;
+        }
+        .hidden {
+            display: none;
+        }
+        input, button, select {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+        }
+        button {
+            background: #2196f3;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .file-item {
+            background: #f9f9f9;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+        .category-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #e3f2fd;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .category-item.active {
+            background: #2196f3;
+            color: white;
+        }
+        .file-actions {
+            margin-top: 10px;
+        }
+        .admin-only {
+            background: #ff5722;
+        }
+         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap');
+    
+    body {
+        font-family: 'Vazirmatn', sans-serif;
+        /* بقیه کدها */
+    }
+    </style>
+</head>
+<body>
+    <!-- بخش ورود -->
+    <div class="login-section" id="loginSection">
+        <h3>ورود به سیستم</h3>
+        <input type="text" id="username" placeholder="نام کاربری">
+        <input type="password" id="password" placeholder="رمز عبور">
+        <button onclick="login()">ورود</button>
+    </div>
+
+    <div class="container hidden" id="mainApp">
+        <!-- سایدبار دسته‌بندی -->
+        <div class="sidebar">
+            <h3>📁 دسته‌بندی‌ها</h3>
+            
+            <div id="adminControls" class="hidden">
+                <input type="text" id="newCategory" placeholder="نام دسته جدید">
+                <button onclick="addCategory()">➕ اضافه کردن دسته</button>
+                <hr>
+            </div>
+
+            <div id="categoriesList">
+                <div class="category-item active" onclick="selectCategory('all')">همه فایل‌ها</div>
+            </div>
+        </div>
+
+        <!-- بخش اصلی -->
+        <div class="main">
+            <div id="uploadSection" class="hidden">
+                <h3>📤 آپلود فایل جدید</h3>
+                <input type="file" id="fileInput">
+                <input type="text" id="fileName" placeholder="نام فایل (اختیاری)">
+                <select id="fileCategory">
+                    <option value="">انتخاب دسته‌بندی</option>
+                </select>
+                <button onclick="uploadFile()">آپلود فایل</button>
+                <button onclick="logout()">🚪 خروج</button>
+            </div>
+
+            <div id="viewerSection">
+                <h3>📂 فایل‌ها 
+                    <span id="currentCategory"></span>
+                    <span id="userRoleBadge"></span>
+                </h3>
+                <div id="filesList">
+                    <!-- فایل‌ها اینجا نمایش داده می‌شوند -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // کاربران مجاز
+        const users = {
+            'مهدیار طایفی': { password: 'mio91fox', role: 'admin' },
+            'بیننده': { password: '1111', role: 'viewer' },
+            'دوستانه': { password: 'dostane', role: 'admin' }
+
+        };
+
+        let currentUser = null;
+        let currentCategory = 'all';
+        let files = JSON.parse(localStorage.getItem('sharedFiles')) || [];
+        let categories = JSON.parse(localStorage.getItem('fileCategories')) || ['علوم', 'هندسه', 'تفکر'];
+
+        // نمایش فایل‌ها
+        function showFiles() {
+            const filesList = document.getElementById('filesList');
+            const filteredFiles = currentCategory === 'all' 
+                ? files 
+                : files.filter(file => file.category === currentCategory);
+            
+            if (filteredFiles.length === 0) {
+                filesList.innerHTML = '<p>📭 فایلی در این دسته وجود ندارد</p>';
+                return;
+            }
+
+            filesList.innerHTML = filteredFiles.map(file => `
+                <div class="file-item">
+                    <strong>📄 ${file.name}</strong>
+                    <div>دسته: ${file.category} | سایز: ${file.size} | تاریخ: ${file.date}</div>
+                    <div class="file-actions">
+                        <button onclick="downloadFile('${file.id}')">⬇️ دانلود</button>
+                        <button onclick="viewFile('${file.id}')">👁️ مشاهده</button>
+                        ${currentUser?.role === 'admin' ? 
+                            `<button class="admin-only" onclick="deleteFile('${file.id}')">🗑️ حذف</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // نمایش دسته‌بندی‌ها
+        function showCategories() {
+            const categoriesList = document.getElementById('categoriesList');
+            const categorySelect = document.getElementById('fileCategory');
+            
+            // به‌روزرسانی لیست دسته‌بندی‌ها
+            categoriesList.innerHTML = `
+                <div class="category-item ${currentCategory === 'all' ? 'active' : ''}" 
+                     onclick="selectCategory('all')">همه فایل‌ها</div>
+            `;
+            
+            categorySelect.innerHTML = '<option value="">انتخاب دسته‌بندی</option>';
+            
+            categories.forEach(cat => {
+                categoriesList.innerHTML += `
+                    <div class="category-item ${currentCategory === cat ? 'active' : ''}" 
+                         onclick="selectCategory('${cat}')">${cat}</div>
+                `;
+                categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+        }
+
+        // انتخاب دسته‌بندی
+        function selectCategory(category) {
+            currentCategory = category;
+            document.getElementById('currentCategory').textContent = 
+                category === 'all' ? '' : `- ${category}`;
+            showCategories();
+            showFiles();
+        }
+
+        // اضافه کردن دسته‌بندی (فقط ادمین)
+        function addCategory() {
+            if (currentUser?.role !== 'admin') return;
+            
+            const newCat = document.getElementById('newCategory').value.trim();
+            if (newCat && !categories.includes(newCat)) {
+                categories.push(newCat);
+                localStorage.setItem('fileCategories', JSON.stringify(categories));
+                showCategories();
+                document.getElementById('newCategory').value = '';
+            }
+        }
+
+        // ورود به سیستم
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (users[username] && users[username].password === password) {
+                currentUser = { username, role: users[username].role };
+                
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                
+                // نمایش کنترل‌های ادمین
+                if (currentUser.role === 'admin') {
+                    document.getElementById('uploadSection').classList.remove('hidden');
+                    document.getElementById('adminControls').classList.remove('hidden');
+                }
+                
+                document.getElementById('userRoleBadge').textContent = 
+                    currentUser.role === 'admin' ? ' مدیر' : '👁️ نمایشگر';
+                    if (currentUser?.role === 'viewer') {
+        document.getElementById('uploadSection').style.display = 'none';
+        document.getElementById('adminControls').style.display = 'none';
+    } else if (currentUser?.role === 'admin') {
+        document.getElementById('uploadSection').style.display = 'block';
+        document.getElementById('adminControls').style.display = 'block';
+    }
+                
+                showCategories();
+                showFiles();
+            } else {
+                alert('نام کاربری یا رمز عبور اشتباه است');
+            }
+        }
+
+        // خروج
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // آپلود فایل (فقط ادمین)
+        function uploadFile() {
+            if (currentUser?.role !== 'admin') {
+                alert('شما دسترسی آپلود ندارید');
+                return;
+            }
+
+            const fileInput = document.getElementById('fileInput');
+            const fileName = document.getElementById('fileName').value || fileInput.files[0]?.name || 'فایل بدون نام';
+            const category = document.getElementById('fileCategory').value || 'سایر';
+
+            if (!fileInput.files[0]) {
+                alert('لطفا یک فایل انتخاب کنید');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const fileData = {
+                id: Date.now().toString(),
+                name: fileName,
+                size: formatFileSize(file.size),
+                date: new Date().toLocaleDateString('fa-IR'),
+                category: category,
+                file: file
+            };
+
+            files.push(fileData);
+            localStorage.setItem('sharedFiles', JSON.stringify(files));
+            
+            fileInput.value = '';
+            document.getElementById('fileName').value = '';
+            showFiles();
+            alert('فایل با موفقیت آپلود شد');
+        }
+
+        // دانلود فایل (همه کاربران)
+        function downloadFile(fileId) {
+            const file = files.find(f => f.id === fileId);
+            if (file) {
+                const url = URL.createObjectURL(file.file);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.name;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        // مشاهده فایل (همه کاربران)
+        function viewFile(fileId) {
+            const file = files.find(f => f.id === fileId);
+            if (file) {
+                const url = URL.createObjectURL(file.file);
+                window.open(url, '_blank');
+            }
+        }
+
+        // حذف فایل (فقط ادمین)
+        function deleteFile(fileId) {
+            if (currentUser?.role !== 'admin') {
+                alert('شما دسترسی حذف فایل ندارید');
+                return;
+            }
+
+            if (confirm('آیا از حذف این فایل مطمئنید؟')) {
+                files = files.filter(file => file.id !== fileId);
+                localStorage.setItem('sharedFiles', JSON.stringify(files));
+                showFiles();
+            }
+        }
+
+        // فرمت سایز فایل
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html>
